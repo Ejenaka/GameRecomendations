@@ -1,0 +1,169 @@
+﻿<UserControl
+    x:Class="GameRecommendations.Views.GamesGridControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:GameRecommendations.Views"
+    xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="400"
+    d:DesignWidth="800"
+    DataContext="{Binding GamesGridViewModel, Source={StaticResource ViewModelLocator}}"
+    mc:Ignorable="d">
+    <Grid>
+        <materialDesign:ColorZone VerticalAlignment="Top" Mode="Dark">
+            <Grid Height="50">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="200" />
+                    <ColumnDefinition Width="10" />
+                </Grid.ColumnDefinitions>
+                <StackPanel
+                    Grid.Column="0"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+                    <materialDesign:PackIcon
+                        Width="30"
+                        Height="20"
+                        Margin="0,0,5,0"
+                        VerticalAlignment="Center"
+                        Kind="Magnify" />
+                    <TextBox
+                        Height="30"
+                        VerticalAlignment="Top"
+                        materialDesign:HintAssist.Hint="Search for Video Game"
+                        FontSize="15"
+                        Text="{Binding SearchQuery, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}">
+                        <TextBox.InputBindings>
+                            <KeyBinding Key="Return" Command="{Binding SearchVideoGamesCommand}" />
+                        </TextBox.InputBindings>
+                    </TextBox>
+                    <materialDesign:PackIcon
+                        Width="30"
+                        Height="20"
+                        Margin="10,0,5,0"
+                        VerticalAlignment="Center"
+                        Kind="FilterOutline" />
+                    <ComboBox
+                        Width="150"
+                        materialDesign:HintAssist.Hint="Filter"
+                        FontSize="15"
+                        ItemsSource="{Binding AllTags}"
+                        SelectedItem="{Binding FilterQuery}" />
+                    <Button
+                        Height="30"
+                        Margin="10,0,10,0"
+                        VerticalAlignment="Center"
+                        Command="{Binding AddFilterCommand}"
+                        Content="Add Filter"
+                        Style="{StaticResource MaterialDesignRaisedDarkButton}" />
+
+                    <ItemsControl ItemsSource="{Binding SelectedTags}">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Button
+                                    Margin="0,0,5,0"
+                                    materialDesign:ButtonAssist.CornerRadius="25"
+                                    Command="{Binding DataContext.RemoveFilterCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    Content="{Binding}"
+                                    Style="{StaticResource MaterialDesignOutlinedSecondaryLightButton}"
+                                    ToolTip="Remove Filter" />
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <WrapPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </StackPanel>
+            </Grid>
+        </materialDesign:ColorZone>
+        <ListBox
+            Margin="0,50,0,40"
+            ItemsSource="{Binding PagedVideoGames}"
+            ScrollViewer.CanContentScroll="True">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <materialDesign:Card
+                        Width="200"
+                        Height="350"
+                        Margin="10"
+                        ToolTip="{Binding Name}">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="300" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            <Image
+                                Grid.Row="0"
+                                Width="300"
+                                Height="300"
+                                Stretch="Uniform">
+                                <Image.Source>
+                                    <BitmapImage UriSource="{Binding ImageUrl}" />
+                                </Image.Source>
+                            </Image>
+                            <TextBlock
+                                Grid.Row="1"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                Text="{Binding Name}"
+                                TextTrimming="CharacterEllipsis"
+                                TextWrapping="WrapWithOverflow" />
+                            <Button
+                                Margin="150,-400,0,0"
+                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
+                                ToolTip="MaterialDesignFloatingActionMiniLightButton">
+                                <materialDesign:PackIcon Kind="Heart" />
+                            </Button>
+                        </Grid>
+                    </materialDesign:Card>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+        </ListBox>
+        <materialDesign:ColorZone VerticalAlignment="Bottom" Mode="SecondaryMid">
+            <Grid Height="40" VerticalAlignment="Bottom">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel
+                    Grid.Column="1"
+                    HorizontalAlignment="Center"
+                    Orientation="Horizontal">
+                    <Button
+                        Command="{Binding PreviousPageCommand}"
+                        Content="{materialDesign:PackIcon Kind=ArrowLeft,
+                                                          Size=24}"
+                        Style="{StaticResource MaterialDesignToolButton}" />
+                    <Button
+                        Command="{Binding NextPageCommand}"
+                        Content="{materialDesign:PackIcon Kind=ArrowRight,
+                                                          Size=24}"
+                        Style="{StaticResource MaterialDesignToolButton}" />
+                </StackPanel>
+                <StackPanel
+                    Grid.Column="2"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+                    <TextBlock Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Text="Page: " />
+                    <TextBlock Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Text="{Binding CurrentPage}" />
+                    <TextBlock Style="{StaticResource MaterialDesignSubtitle1TextBlock}" Text=" of " />
+                    <TextBlock
+                        Width="40"
+                        Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                        Text="{Binding TotalPages}" />
+                </StackPanel>
+            </Grid>
+        </materialDesign:ColorZone>
+    </Grid>
+</UserControl>
