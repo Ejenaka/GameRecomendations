@@ -65,6 +65,7 @@
                                     Margin="0,0,5,0"
                                     materialDesign:ButtonAssist.CornerRadius="25"
                                     Command="{Binding DataContext.RemoveFilterCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    CommandParameter="{Binding}"
                                     Content="{Binding}"
                                     Style="{StaticResource MaterialDesignOutlinedSecondaryLightButton}"
                                     ToolTip="Remove Filter" />

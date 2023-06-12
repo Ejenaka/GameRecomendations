@@ -16,7 +16,7 @@ public class VideoGameCsvMap : ClassMap<VideoGame>
 
         Map(g => g.Developer).Name("developer");
 
-        Map(g => g.PopularTags).Name("popular_tags");
+        Map(g => g.PopularTags).Name("popular_tags").TypeConverter<TagsConverter>();
 
         Map(g => g.Genre).Name("genre");
 

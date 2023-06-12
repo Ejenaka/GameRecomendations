@@ -14,6 +14,7 @@ public class FileDataLoader : IDataLoader
         using var streamReader = new StreamReader(source);
         using var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture);
 
+        csvReader.Context.TypeConverterCache.AddConverter<string[]>(new TagsConverter());
         csvReader.Context.RegisterClassMap<VideoGameCsvMap>();
 
         _data = await csvReader.GetRecordsAsync<VideoGame>().ToListAsync();
@@ -28,6 +29,6 @@ public class FileDataLoader : IDataLoader
 
     public List<string> LoadVideoGamesTags(IEnumerable<VideoGame> videoGames)
     {
-        return videoGames.SelectMany(g => g.PopularTags.Split(',')).Distinct().ToList();
+        return videoGames.SelectMany(g => g.PopularTags).Distinct().OrderBy(x => x).ToList();
     }
 }

@@ -24,12 +24,29 @@ public class GamesGridViewModel : ViewModelBase
     private List<VideoGame> _videoGamesToView;
     private ObservableCollection<VideoGame> _pagedVideoGames;
     private ObservableCollection<string> _allTags;
-    private ObservableCollection<string> _selectedTags;
+    private ObservableCollection<string> _selectedTags = new ObservableCollection<string>();
 
     public GamesGridViewModel(IDataLoader dataLoader, IUrlImageLoader urlImageLoader, INavigationService navigationService)
     {
         _dataLoader = dataLoader;
         _urlImageLoader = urlImageLoader;
+
+        NextPageCommand = new RelayCommand(async () => await NextPageAsync(), () => CurrentPage < TotalPages);
+        PreviousPageCommand = new RelayCommand(async () => await PreviousPageAsync(), () => CurrentPage > 1);
+        AddFilterCommand = new RelayCommand(async () => await AddFilterAsync(FilterQuery), () => !string.IsNullOrEmpty(FilterQuery));
+        RemoveFilterCommand = new RelayCommand<string>(async (filter) => await RemoveFilterAsync(filter));
+        SearchVideoGamesCommand = new RelayCommand(async () =>
+        {
+            if (string.IsNullOrEmpty(SearchQuery))
+            {
+                await ClearSearchAsync();
+            }
+            else
+            {
+                await SearchVideoGamesAsync();
+            }
+        });
+
 
         navigationService.OnPageChanged += async (page) =>
         {
@@ -42,7 +59,6 @@ public class GamesGridViewModel : ViewModelBase
                 await LoadVideoGamesPageAsync(1);
 
                 AllTags = new ObservableCollection<string>(dataLoader.LoadVideoGamesTags(_allVideoGames));
-                SelectedTags = new ObservableCollection<string>();
             }
         };
     }
@@ -94,29 +110,17 @@ public class GamesGridViewModel : ViewModelBase
         }
     }
 
-    public ICommand NextPageCommand => new RelayCommand(async () => await NextPageAsync(), () => CurrentPage < TotalPages);
+    public ICommand NextPageCommand { get; }
 
-    public ICommand PreviousPageCommand => new RelayCommand(async () => await PreviousPageAsync(), () => CurrentPage > 1);
+    public ICommand PreviousPageCommand { get; }
 
-    public ICommand SearchVideoGamesCommand => new RelayCommand(async () =>
-    {
-        if (string.IsNullOrEmpty(SearchQuery))
-        {
-            await ClearSearchAsync();
-        }
-        else
-        {
-            await SearchVideoGamesAsync();
-        }
-    });
+    public ICommand SearchVideoGamesCommand { get; }
 
-    public ICommand AddFilterCommand => new RelayCommand(() =>
-    {
-        SelectedTags.Add(FilterQuery);
-        AllTags.Remove(FilterQuery);
-    },() => !string.IsNullOrEmpty(FilterQuery));
+    public ICommand ClearSearchCommand { get; }
 
-    public ICommand RemoveFilterCommand => new RelayCommand<string>((filter) => SelectedTags.Remove(filter));
+    public ICommand AddFilterCommand { get; }
+
+    public ICommand RemoveFilterCommand { get; }
 
     public async Task LoadGamesAsync()
     {
@@ -136,6 +140,8 @@ public class GamesGridViewModel : ViewModelBase
 
         CurrentPage = page;
 
+        ApplyFilters();
+
         var toSkip = (_currentPage - 1) * _itemsPerPage;
         var toTake = _videoGamesToView.Count - toSkip < _itemsPerPage ? _videoGamesToView.Count - toSkip : _itemsPerPage;
 
@@ -151,6 +157,7 @@ public class GamesGridViewModel : ViewModelBase
 
         await Task.WhenAll(loadImagesTasks);
 
+        TotalPages = CalculateTotalPages(_videoGamesToView.Count);
         PagedVideoGames = new ObservableCollection<VideoGame>(pagedVideoGames);
     }
 
@@ -171,8 +178,6 @@ public class GamesGridViewModel : ViewModelBase
     {
         _videoGamesToView = _allVideoGames.Where(g => g.Name.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)).ToList();
 
-        TotalPages = CalculateTotalPages(_videoGamesToView.Count);
-
         await LoadVideoGamesPageAsync(1);
     }
 
@@ -180,8 +185,30 @@ public class GamesGridViewModel : ViewModelBase
     {
         _videoGamesToView = _allVideoGames;
 
-        TotalPages = CalculateTotalPages(_allVideoGames.Count);
+        await LoadVideoGamesPageAsync(1);
+    }
+
+    private async Task AddFilterAsync(string filter)
+    {
+        SelectedTags.Add(filter);
+        AllTags.Remove(filter);
 
         await LoadVideoGamesPageAsync(1);
+    }
+
+    private async Task RemoveFilterAsync(string filter)
+    {
+        SelectedTags.Remove(filter);
+        AllTags.Add(filter);
+        AllTags = new ObservableCollection<string>(AllTags.OrderBy(x => x));
+
+        await LoadVideoGamesPageAsync(1);
+    }
+
+    private void ApplyFilters()
+    {
+        _videoGamesToView = SelectedTags.Count > 0
+            ? _allVideoGames.Where(g => SelectedTags.All(tag => g.PopularTags.Contains(tag))).ToList()
+            : _allVideoGames;
     }
 }
