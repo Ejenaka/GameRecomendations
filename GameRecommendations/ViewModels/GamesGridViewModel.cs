@@ -20,11 +20,12 @@ public class GamesGridViewModel : ViewModelBase
     private int _currentPage;
     private string _searchQuery;
     private string _filterQuery;
+    private bool _viewLiked = false;
     private List<VideoGame> _allVideoGames;
     private List<VideoGame> _videoGamesToView;
     private ObservableCollection<VideoGame> _pagedVideoGames;
     private ObservableCollection<string> _allTags;
-    private ObservableCollection<string> _selectedTags = new ObservableCollection<string>();
+    private ObservableCollection<string> _selectedTags = new();
 
     public GamesGridViewModel(IDataLoader dataLoader, IUrlImageLoader urlImageLoader, INavigationService navigationService)
     {
@@ -35,6 +36,7 @@ public class GamesGridViewModel : ViewModelBase
         PreviousPageCommand = new RelayCommand(async () => await PreviousPageAsync(), () => CurrentPage > 1);
         AddFilterCommand = new RelayCommand(async () => await AddFilterAsync(FilterQuery), () => !string.IsNullOrEmpty(FilterQuery));
         RemoveFilterCommand = new RelayCommand<string>(async (filter) => await RemoveFilterAsync(filter));
+        ToggleViewLikedVideoGamesCommand = new RelayCommand(async () => await ToggleViewLikedVideoGamesAsync());
         SearchVideoGamesCommand = new RelayCommand(async () =>
         {
             if (string.IsNullOrEmpty(SearchQuery))
@@ -43,7 +45,7 @@ public class GamesGridViewModel : ViewModelBase
             }
             else
             {
-                await SearchVideoGamesAsync();
+                await TrySearchAndApplyFiltersAsync();
             }
         });
 
@@ -90,7 +92,13 @@ public class GamesGridViewModel : ViewModelBase
     public int TotalPages
     {
         get => _totalPages;
-        set => SetProperty(ref _totalPages, value);
+        set
+        {
+            SetProperty(ref _totalPages, value);
+
+            ((RelayCommand)NextPageCommand).NotifyCanExecuteChanged();
+            ((RelayCommand)PreviousPageCommand).NotifyCanExecuteChanged();
+        }
     }
 
     public string SearchQuery
@@ -110,6 +118,12 @@ public class GamesGridViewModel : ViewModelBase
         }
     }
 
+    public bool ViewLikedVideoGames
+    {
+        get => _viewLiked;
+        set => SetProperty(ref _viewLiked, value);
+    }
+
     public ICommand NextPageCommand { get; }
 
     public ICommand PreviousPageCommand { get; }
@@ -122,7 +136,9 @@ public class GamesGridViewModel : ViewModelBase
 
     public ICommand RemoveFilterCommand { get; }
 
-    public async Task LoadGamesAsync()
+    public ICommand ToggleViewLikedVideoGamesCommand { get; }
+
+    private async Task LoadGamesAsync()
     {
         var sourceFile = "./Data/games.csv";
 
@@ -133,14 +149,9 @@ public class GamesGridViewModel : ViewModelBase
 
     private int CalculateTotalPages(int itemsCount) => (int)Math.Ceiling(itemsCount / (double)_itemsPerPage);
 
-    public async Task LoadVideoGamesPageAsync(int page)
+    private async Task LoadVideoGamesPageAsync(int page)
     {
-        ((RelayCommand)NextPageCommand).NotifyCanExecuteChanged();
-        ((RelayCommand)PreviousPageCommand).NotifyCanExecuteChanged();
-
         CurrentPage = page;
-
-        ApplyFilters();
 
         var toSkip = (_currentPage - 1) * _itemsPerPage;
         var toTake = _videoGamesToView.Count - toSkip < _itemsPerPage ? _videoGamesToView.Count - toSkip : _itemsPerPage;
@@ -161,12 +172,12 @@ public class GamesGridViewModel : ViewModelBase
         PagedVideoGames = new ObservableCollection<VideoGame>(pagedVideoGames);
     }
 
-    public async Task NextPageAsync()
+    private async Task NextPageAsync()
     {
         await LoadVideoGamesPageAsync(CurrentPage + 1);
     }
 
-    public async Task PreviousPageAsync()
+    private async Task PreviousPageAsync()
     {
         if (CurrentPage > 1)
         {
@@ -174,16 +185,40 @@ public class GamesGridViewModel : ViewModelBase
         }
     }
 
-    public async Task SearchVideoGamesAsync()
+    private async Task TrySearchAndApplyFiltersAsync()
     {
-        _videoGamesToView = _allVideoGames.Where(g => g.Name.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase)).ToList();
+        if (!string.IsNullOrEmpty(SearchQuery))
+        {
+            var searchedGames = _allVideoGames.Where(g => g.Name.Contains(SearchQuery, StringComparison.InvariantCultureIgnoreCase));
+
+            _videoGamesToView = ApplyFilters(searchedGames).ToList();
+        }
+        else
+        {
+            _videoGamesToView = ApplyFilters(_allVideoGames).ToList();
+        }
 
         await LoadVideoGamesPageAsync(1);
     }
 
-    public async Task ClearSearchAsync()
+    private IEnumerable<VideoGame> ApplyFilters(IEnumerable<VideoGame> videoGames)
     {
-        _videoGamesToView = _allVideoGames;
+        if (ViewLikedVideoGames)
+        {
+            videoGames = videoGames.Where(g => g.IsLiked);
+        }
+
+        if (SelectedTags.Count > 0)
+        {
+            videoGames = videoGames.Where(g => SelectedTags.All(tag => g.PopularTags.Contains(tag)));
+        }
+
+        return videoGames;
+    }
+
+    private async Task ClearSearchAsync()
+    {
+        _videoGamesToView = ApplyFilters(_allVideoGames).ToList();
 
         await LoadVideoGamesPageAsync(1);
     }
@@ -192,6 +227,8 @@ public class GamesGridViewModel : ViewModelBase
     {
         SelectedTags.Add(filter);
         AllTags.Remove(filter);
+
+        _videoGamesToView = _videoGamesToView.Where(g => SelectedTags.All(tag => g.PopularTags.Contains(tag))).ToList();
 
         await LoadVideoGamesPageAsync(1);
     }
@@ -202,13 +239,20 @@ public class GamesGridViewModel : ViewModelBase
         AllTags.Add(filter);
         AllTags = new ObservableCollection<string>(AllTags.OrderBy(x => x));
 
-        await LoadVideoGamesPageAsync(1);
+        await TrySearchAndApplyFiltersAsync();
     }
 
-    private void ApplyFilters()
+    private async Task ToggleViewLikedVideoGamesAsync()
     {
-        _videoGamesToView = SelectedTags.Count > 0
-            ? _allVideoGames.Where(g => SelectedTags.All(tag => g.PopularTags.Contains(tag))).ToList()
-            : _allVideoGames;
+        if (ViewLikedVideoGames)
+        {
+            _videoGamesToView = _videoGamesToView.Where(g => g.IsLiked).ToList();
+
+            await LoadVideoGamesPageAsync(1);
+        }
+        else
+        {
+            await TrySearchAndApplyFiltersAsync();
+        }
     }
 }

@@ -25,5 +25,7 @@ public class VideoGame
 
     public string? ImageUrl { get; set; }
 
+    public bool IsLiked { get; set; }
+
     public int? RecommendationScore { get; set; }
 }

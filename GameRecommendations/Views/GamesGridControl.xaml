@@ -15,8 +15,7 @@
             <Grid Height="50">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="200" />
-                    <ColumnDefinition Width="10" />
+                    <ColumnDefinition Width="120" />
                 </Grid.ColumnDefinitions>
                 <StackPanel
                     Grid.Column="0"
@@ -33,9 +32,10 @@
                         VerticalAlignment="Top"
                         materialDesign:HintAssist.Hint="Search for Video Game"
                         FontSize="15"
-                        Text="{Binding SearchQuery, Mode=TwoWay, NotifyOnTargetUpdated=True, UpdateSourceTrigger=PropertyChanged}">
+                        Text="{Binding SearchQuery, UpdateSourceTrigger=PropertyChanged}">
                         <TextBox.InputBindings>
                             <KeyBinding Key="Return" Command="{Binding SearchVideoGamesCommand}" />
+                            <KeyBinding Key="Enter" Command="{Binding SearchVideoGamesCommand}" />
                         </TextBox.InputBindings>
                     </TextBox>
                     <materialDesign:PackIcon
@@ -57,7 +57,6 @@
                         Command="{Binding AddFilterCommand}"
                         Content="Add Filter"
                         Style="{StaticResource MaterialDesignRaisedDarkButton}" />
-
                     <ItemsControl ItemsSource="{Binding SelectedTags}">
                         <ItemsControl.ItemTemplate>
                             <DataTemplate>
@@ -78,6 +77,21 @@
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
                 </StackPanel>
+                <StackPanel
+                    Grid.Column="1"
+                    VerticalAlignment="Center"
+                    Orientation="Horizontal">
+                    <TextBlock
+                        Margin="0,0,10,0"
+                        Style="{StaticResource MaterialDesignBody1TextBlock}"
+                        Text="View Liked" />
+                    <ToggleButton
+                        Height="30"
+                        Command="{Binding ToggleViewLikedVideoGamesCommand}"
+                        IsChecked="{Binding ViewLikedVideoGames}"
+                        Style="{StaticResource MaterialDesignSwitchToggleButton}" />
+                </StackPanel>
+
             </Grid>
         </materialDesign:ColorZone>
         <ListBox
@@ -86,41 +100,44 @@
             ScrollViewer.CanContentScroll="True">
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <materialDesign:Card
-                        Width="200"
-                        Height="350"
-                        Margin="10"
-                        ToolTip="{Binding Name}">
-                        <Grid>
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="300" />
-                                <RowDefinition Height="*" />
-                            </Grid.RowDefinitions>
-                            <Image
-                                Grid.Row="0"
-                                Width="300"
-                                Height="300"
-                                Stretch="Uniform">
-                                <Image.Source>
-                                    <BitmapImage UriSource="{Binding ImageUrl}" />
-                                </Image.Source>
-                            </Image>
-                            <TextBlock
-                                Grid.Row="1"
-                                HorizontalAlignment="Center"
-                                VerticalAlignment="Center"
-                                Style="{StaticResource MaterialDesignHeadline6TextBlock}"
-                                Text="{Binding Name}"
-                                TextTrimming="CharacterEllipsis"
-                                TextWrapping="WrapWithOverflow" />
-                            <Button
-                                Margin="150,-400,0,0"
-                                Style="{StaticResource MaterialDesignFloatingActionMiniButton}"
-                                ToolTip="MaterialDesignFloatingActionMiniLightButton">
-                                <materialDesign:PackIcon Kind="Heart" />
-                            </Button>
-                        </Grid>
-                    </materialDesign:Card>
+                    <StackPanel>
+                        <materialDesign:Card
+                            Width="200"
+                            Height="350"
+                            Margin="10"
+                            ToolTip="{Binding Name}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="300" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+                                <Image
+                                    Grid.Row="0"
+                                    Width="300"
+                                    Height="300"
+                                    Stretch="Uniform">
+                                    <Image.Source>
+                                        <BitmapImage UriSource="{Binding ImageUrl}" />
+                                    </Image.Source>
+                                </Image>
+                                <TextBlock
+                                    Grid.Row="1"
+                                    HorizontalAlignment="Center"
+                                    VerticalAlignment="Center"
+                                    Style="{StaticResource MaterialDesignHeadline6TextBlock}"
+                                    Text="{Binding Name}"
+                                    TextTrimming="CharacterEllipsis"
+                                    TextWrapping="WrapWithOverflow" />
+                            </Grid>
+                        </materialDesign:Card>
+                        <ToggleButton
+                            Width="30"
+                            Height="30"
+                            Margin="170,-5,0,0"
+                            Content="{materialDesign:PackIcon Kind=Heart}"
+                            IsChecked="{Binding IsLiked}"
+                            Style="{StaticResource MaterialDesignFlatPrimaryToggleButton}" />
+                    </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>
             <ListBox.ItemsPanel>
