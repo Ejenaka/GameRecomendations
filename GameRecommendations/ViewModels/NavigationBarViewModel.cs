@@ -26,10 +26,7 @@ public class NavigationBarViewModel : ViewModelBase
                     _navigationService.ChangePage(new VideoGamesPage());
                     break;
                 case 1:
-                    // _navigationService.ChangePage(new LikedVideoGamesPage());
-                    break;
-                case 2:
-                    // _navigationService.ChangePage(new RecommendationsPage());
+                    _navigationService.ChangePage(new RecommendedVideoGamesPage());
                     break;
                 default:
                     break;

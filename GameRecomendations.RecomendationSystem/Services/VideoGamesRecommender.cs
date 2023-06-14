@@ -2,23 +2,27 @@
 using Accord.Math.Distances;
 using GameRecomendations.RecomendationSystem.Contracts;
 using GameRecomendations.Shared;
+using System.Collections.Concurrent;
 
 namespace GameRecomendations.RecomendationSystem.Services;
 
 public class VideoGamesRecommender : IRecommender
 {
+    private readonly IDataLoader _dataLoader;
     private readonly IDataProcessor<string[][]> _dataProcessor;
-    private readonly List<VideoGame> _videoGames;
+    private List<VideoGame> _videoGames;
     private double[][]? _tfIdfMatrix;
 
     public VideoGamesRecommender(IDataLoader dataLoader, IDataProcessor<string[][]> dataProcessor)
     {
+        _dataLoader = dataLoader;
         _dataProcessor = dataProcessor;
-        _videoGames = dataLoader.GetLoadedData();
     }
 
     public async Task<List<VideoGame>> RecommendVideoGamesAsync(IEnumerable<VideoGame> videoGames)
     {
+        _videoGames = _dataLoader.GetLoadedData();
+
         var tfIdfMatrix = await GetOrCalculateTfIdfMatrixAsync();
 
         var similarityScoresVectors = CalculateSimilarityScoresVectors(tfIdfMatrix, videoGames).ToList();
@@ -64,16 +68,15 @@ public class VideoGamesRecommender : IRecommender
         foreach (var (likedVideGame, likedVideGameIndex) in likedVideoGames.Zip(likedVideoGamesIndexes, Tuple.Create))
         {
             var gameTfIdfMatrixRow = tfIdfMatrix[likedVideGameIndex];
-            var gameSimilarityScores = new List<(int, double)>(capacity: tfIdfMatrix.GetLength(0));
+            var gameSimilarityScores = new ConcurrentBag<(int, double)>();
 
             Parallel.ForEach(tfIdfMatrix, (tfidfRow, state, index) =>
             {
                 gameSimilarityScores.Add(((int)index, cosine.Similarity(gameTfIdfMatrixRow, tfidfRow)));
             });
 
-            yield return gameSimilarityScores;
+            yield return gameSimilarityScores.ToList();
         }
-
     }
 
     private IEnumerable<(int Index, double RecommendationScore)> CalculateAverageSimilarityScoresVector(List<List<(int Index, double RecommendationScore)>> similatiryVectors)
@@ -86,10 +89,17 @@ public class VideoGamesRecommender : IRecommender
 
             for (var j = 0; j < similatiryVectors.Count; j++)
             {
-                averageScore += similatiryVectors[j][i].RecommendationScore;
+                try
+                {
+                    averageScore += similatiryVectors[j][i].RecommendationScore;
+                }
+                catch (ArgumentOutOfRangeException e)
+                {
+                    int o = 0;
+                }
             }
 
-            averageScore /= similatiryVectors[0].Count;
+            averageScore /= similatiryVectors.Count;
 
             averageScore = Math.Round(averageScore * 100);
 

@@ -16,4 +16,5 @@ public class ViewModelLocator
     public MainViewModel MainViewModel { get => _serviceProvider.GetRequiredService<MainViewModel>(); }
     public NavigationBarViewModel NavigationBarViewModel { get => _serviceProvider.GetRequiredService<NavigationBarViewModel>(); }
     public GamesGridViewModel GamesGridViewModel { get => _serviceProvider.GetRequiredService<GamesGridViewModel>(); }
+    public RecommendedGamesGridViewModel RecommendedGamesGridViewModel { get => _serviceProvider.GetRequiredService<RecommendedGamesGridViewModel>(); }
 }

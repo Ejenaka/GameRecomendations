@@ -29,6 +29,7 @@ public partial class App : Application
                 services.AddSingleton<MainViewModel>();
                 services.AddSingleton<NavigationBarViewModel>();
                 services.AddSingleton<GamesGridViewModel>();
+                services.AddSingleton<RecommendedGamesGridViewModel>();
 
                 // Services
                 services.AddSingleton<INavigationService, NavigationService>();

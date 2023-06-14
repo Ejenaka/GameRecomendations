@@ -10,7 +10,7 @@ public class DataProcessor : IDataProcessor<string[][]>
 
     public async Task<string[][]> ProcessDataAsync(IEnumerable<VideoGame> data)
     {
-        var stopWords = await File.ReadAllLinesAsync("english stopwords.txt");
+        var stopWords = await File.ReadAllLinesAsync("Data/english stopwords.txt");
         var tokenizedDescriptionsList = data.Select(x => x.Description.Tokenize().ToList()).ToList();
 
         Parallel.ForEach(tokenizedDescriptionsList, description => description.RemoveAll(s => stopWords.Contains(s)));

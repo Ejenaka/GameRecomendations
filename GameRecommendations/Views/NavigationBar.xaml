@@ -42,22 +42,7 @@
                     </StackPanel>
                 </TabItem.Header>
             </TabItem>
-            <TabItem>
-                <TabItem.Header>
-                    <StackPanel
-                        Width="auto"
-                        Height="auto"
-                        Orientation="Horizontal">
-                        <materialDesign:PackIcon
-                            Width="25"
-                            Height="25"
-                            Margin="0,0,10,0"
-                            Kind="HeartOutline" />
-                        <TextBlock VerticalAlignment="Center" Text="Liked Games" />
-                    </StackPanel>
-                </TabItem.Header>
-            </TabItem>
-            <TabItem Width="150">
+            <TabItem Width="200">
                 <TabItem.Header>
                     <StackPanel
                         Width="auto"
@@ -68,7 +53,7 @@
                             Height="25"
                             Margin="0,0,10,0"
                             Kind="CheckCircleOutline" />
-                        <TextBlock VerticalAlignment="Center" Text="Suggestions" />
+                        <TextBlock VerticalAlignment="Center" Text="Recommendations" />
                     </StackPanel>
                 </TabItem.Header>
             </TabItem>

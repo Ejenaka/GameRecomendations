@@ -6,6 +6,8 @@ namespace GameRecommendations.ViewModels;
 
 public class MainViewModel : ViewModelBase
 {
+    private Page _currentPage;
+
     public MainViewModel(INavigationService navigationService)
     {
         navigationService.OnPageChanged += (page) => CurrentPage = page;
@@ -13,5 +15,9 @@ public class MainViewModel : ViewModelBase
         navigationService.ChangePage(new VideoGamesPage());
     }
 
-    public Page CurrentPage { get; set; }
+    public Page CurrentPage
+    {
+        get => _currentPage;
+        set => SetProperty(ref _currentPage, value);
+    }
 }

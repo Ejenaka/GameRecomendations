@@ -22,6 +22,9 @@
     mc:Ignorable="d">
     <Grid>
         <v:NavigationBar />
-        <Frame Margin="0,49,0,0" Content="{Binding CurrentPage}" />
+        <Frame
+            Margin="0,49,0,0"
+            Content="{Binding CurrentPage, UpdateSourceTrigger=PropertyChanged}"
+            NavigationUIVisibility="Hidden" />
     </Grid>
 </Window>
