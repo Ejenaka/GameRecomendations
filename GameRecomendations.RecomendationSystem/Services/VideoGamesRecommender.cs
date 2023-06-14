@@ -89,14 +89,7 @@ public class VideoGamesRecommender : IRecommender
 
             for (var j = 0; j < similatiryVectors.Count; j++)
             {
-                try
-                {
-                    averageScore += similatiryVectors[j][i].RecommendationScore;
-                }
-                catch (ArgumentOutOfRangeException e)
-                {
-                    int o = 0;
-                }
+                averageScore += similatiryVectors[j][i].RecommendationScore;
             }
 
             averageScore /= similatiryVectors.Count;
