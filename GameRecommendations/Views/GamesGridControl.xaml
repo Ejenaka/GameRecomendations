@@ -15,7 +15,7 @@
             <Grid Height="50">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="150" />
                 </Grid.ColumnDefinitions>
                 <StackPanel
                     Grid.Column="0"
@@ -84,7 +84,7 @@
                     <TextBlock
                         Margin="0,0,10,0"
                         Style="{StaticResource MaterialDesignBody1TextBlock}"
-                        Text="View Liked" />
+                        Text="Only Liked" />
                     <ToggleButton
                         Height="30"
                         Command="{Binding ToggleViewLikedVideoGamesCommand}"
