@@ -98,8 +98,6 @@ public class GamesGridViewModel : GamesGridViewModelBase
 
     public ICommand SearchVideoGamesCommand { get; }
 
-    public ICommand ClearSearchCommand { get; }
-
     public ICommand AddFilterCommand { get; }
 
     public ICommand RemoveFilterCommand { get; }

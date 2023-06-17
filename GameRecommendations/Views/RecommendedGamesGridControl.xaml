@@ -47,6 +47,16 @@
                                     TextWrapping="WrapWithOverflow" />
                             </Grid>
                         </materialDesign:Card>
+                        <StackPanel HorizontalAlignment="Center" Orientation="Horizontal">
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                Text="Score: " />
+                            <TextBlock
+                                VerticalAlignment="Center"
+                                Style="{StaticResource MaterialDesignSubtitle1TextBlock}"
+                                Text="{Binding RecommendationScore}" />
+                        </StackPanel>
                     </StackPanel>
                 </DataTemplate>
             </ListBox.ItemTemplate>

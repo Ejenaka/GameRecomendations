@@ -8,10 +8,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Commands\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="..\.editorconfig" Link=".editorconfig" />
   </ItemGroup>
 
@@ -24,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\GameRecomendations.RecomendationSystem\GameRecomendations.RecomendationSystem.csproj" />
+    <ProjectReference Include="..\GameRecomendations.RecomendationSystem\GameRecommendations.RecommendationSystem.csproj" />
   </ItemGroup>
 
   <ItemGroup>

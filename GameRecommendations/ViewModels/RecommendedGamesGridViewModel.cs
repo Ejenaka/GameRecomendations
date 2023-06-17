@@ -7,8 +7,6 @@ namespace GameRecommendations.ViewModels;
 
 public class RecommendedGamesGridViewModel : GamesGridViewModelBase
 {
-    private readonly IDataLoader _dataLoader;
-
     public RecommendedGamesGridViewModel(IUrlImageLoader urlImageLoader, IDataLoader dataLoader, IRecommender recommender, INavigationService navigationService)
         : base(urlImageLoader)
     {
@@ -18,7 +16,9 @@ public class RecommendedGamesGridViewModel : GamesGridViewModelBase
             {
                 var likedVideoGames = dataLoader.GetLoadedData().Where(g => g.IsLiked);
 
-                _videoGamesToView = await recommender.RecommendVideoGamesAsync(likedVideoGames);
+                var recommendedGames = await recommender.RecommendVideoGamesAsync(likedVideoGames);
+
+                _videoGamesToView = recommendedGames.Where(g => !g.IsLiked).ToList();
 
                 await LoadVideoGamesPageAsync(1);
             }

@@ -1,13 +1,12 @@
 ﻿using GameRecomendations.Shared;
 
-namespace GameRecomendations.RecomendationSystem.Contracts
+namespace GameRecomendations.RecomendationSystem.Contracts;
+
+public interface IDataLoader
 {
-    public interface IDataLoader
-    {
-        Task<List<VideoGame>> LoadDataAsync(string source);
+    Task<List<VideoGame>> LoadDataAsync(string source);
 
-        List<string> LoadVideoGamesTags(IEnumerable<VideoGame> videoGames);
+    List<string> LoadVideoGamesTags(IEnumerable<VideoGame> videoGames);
 
-        List<VideoGame> GetLoadedData();
-    }
+    List<VideoGame> GetLoadedData();
 }

@@ -70,10 +70,11 @@ public class VideoGamesRecommender : IRecommender
             var gameTfIdfMatrixRow = tfIdfMatrix[likedVideGameIndex];
             var gameSimilarityScores = new ConcurrentBag<(int, double)>();
 
-            Parallel.ForEach(tfIdfMatrix, (tfidfRow, state, index) =>
+            for (int i = 0; i < tfIdfMatrix.GetLength(0); i++)
             {
-                gameSimilarityScores.Add(((int)index, cosine.Similarity(gameTfIdfMatrixRow, tfidfRow)));
-            });
+                var tfIdfRow = tfIdfMatrix[i];
+                gameSimilarityScores.Add((i, cosine.Similarity(gameTfIdfMatrixRow, tfIdfRow)));
+            }
 
             yield return gameSimilarityScores.ToList();
         }
@@ -90,7 +91,7 @@ public class VideoGamesRecommender : IRecommender
             for (var j = 0; j < similatiryVectors.Count; j++)
             {
                 averageScore += similatiryVectors[j][i].RecommendationScore;
-            }
+            } 
 
             averageScore /= similatiryVectors.Count;
 
