@@ -6,8 +6,6 @@ namespace GameRecommendations.Helpers;
 
 public class ViewModelLocator
 {
-    private static IServiceProvider _serviceProvider;
-
     public static void Init(IServiceProvider serviceProvider)
     {
         _serviceProvider = serviceProvider;

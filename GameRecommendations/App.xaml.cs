@@ -8,6 +8,7 @@ using GameRecommendations.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Windows;
+using Microsoft.Extensions.Configuration;
 
 namespace GameRecommendations;
 
@@ -23,6 +24,9 @@ public partial class App : Application
         AppHost = Host.CreateDefaultBuilder()
             .ConfigureServices((contex, services) =>
             {
+                // Add configuration to DI
+                services.AddSingleton(contex.Configuration);
+                
                 services.AddSingleton<MainWindow>();
 
                 // ViewModels

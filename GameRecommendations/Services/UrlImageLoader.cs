@@ -3,17 +3,17 @@ using craftersmine.SteamGridDBNet.Exceptions;
 using GameRecommendations.Services.Contracts;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 
 namespace GameRecommendations.Services;
 
 public class UrlImageLoader : IUrlImageLoader
 {
     private readonly SteamGridDb _steamGridDb;
-    private readonly string _notFoundImageUrl = "https://static.vecteezy.com/system/resources/previews/005/720/408/original/crossed-image-icon-picture-not-available-delete-picture-symbol-free-vector.jpg";
 
-    public UrlImageLoader()
+    public UrlImageLoader(IConfiguration configuration)
     {
-        _steamGridDb = new SteamGridDb("6cc986b4bbc47f5e792b5d5597a6883c");
+        _steamGridDb = new SteamGridDb(configuration["SteamGridDbApiKey"]);
     }
 
     public async Task<string> GetImageUrlAsync(int appId)
@@ -23,11 +23,11 @@ public class UrlImageLoader : IUrlImageLoader
             var game = await _steamGridDb.GetGameBySteamIdAsync(appId);
             var grid = (await _steamGridDb.GetGridsByGameIdAsync(game.Id, dimensions: SteamGridDbDimensions.W600H900)).FirstOrDefault();
 
-            return grid?.FullImageUrl ?? _notFoundImageUrl;
+            return grid?.FullImageUrl ?? Resources.ImageNotFoundUrl;
         }
         catch (SteamGridDbException)
         {
-            return _notFoundImageUrl;
+            return Resources.ImageNotFoundUrl;
         }
     }
 }
