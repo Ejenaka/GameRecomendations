@@ -1,34 +1,47 @@
-﻿using CsvHelper;
+﻿using System.Globalization;
+using CsvHelper;
 using GameRecomendations.RecomendationSystem.Contracts;
 using GameRecomendations.Shared;
-using System.Globalization;
 
-namespace GameRecomendations.RecomendationSystem.Services;
-
-public class FileDataLoader : IDataLoader
+namespace GameRecommendations.RecommendationSystem.Services
 {
-    private List<VideoGame>? _data;
-
-    public async Task<List<VideoGame>> LoadDataAsync(string source)
+    public class FileDataLoader : IDataLoader
     {
-        using var streamReader = new StreamReader(source);
-        using var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture);
+        private List<VideoGame>? _videoGamesData;
 
-        csvReader.Context.TypeConverterCache.AddConverter<string[]>(new TagsConverter());
-        csvReader.Context.RegisterClassMap<VideoGameCsvMap>();
+        public async Task<List<VideoGame>> LoadDataAsync(string source)
+        {
+            if (string.IsNullOrWhiteSpace(source))
+                throw new ArgumentException("Source file path cannot be null or empty.", nameof(source));
 
-        _data = await csvReader.GetRecordsAsync<VideoGame>().ToListAsync();
+            if (!File.Exists(source))
+                throw new FileNotFoundException("The specified source file does not exist.", source);
 
-        return _data;
-    }
+            using var streamReader = new StreamReader(source);
+            using var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture);
 
-    public List<VideoGame> GetLoadedData()
-    {
-        return _data ?? throw new InvalidOperationException("Data has not been loaded.");
-    }
+            csvReader.Context.TypeConverterCache.AddConverter<string[]>(new TagsConverter());
+            csvReader.Context.RegisterClassMap<VideoGameCsvMap>();
 
-    public List<string> LoadVideoGamesTags(IEnumerable<VideoGame> videoGames)
-    {
-        return videoGames.SelectMany(g => g.PopularTags).Distinct().OrderBy(x => x).ToList();
+            _videoGamesData = await csvReader.GetRecordsAsync<VideoGame>().ToListAsync();
+
+            return _videoGamesData;
+        }
+
+        public List<VideoGame> GetLoadedData()
+        {
+            return _videoGamesData ?? throw new InvalidOperationException("Data has not been loaded.");
+        }
+
+        public List<string> LoadVideoGamesTags(IEnumerable<VideoGame> videoGames)
+        {
+            Console.WriteLine("Loading video games tags test log");
+
+            return videoGames
+                .SelectMany(g => g.PopularTags)
+                .Distinct()
+                .OrderBy(x => x)
+                .ToList();
+        }
     }
 }
