@@ -21,16 +21,35 @@ public class VideoGamesRecommender : IRecommender
 
     public async Task<List<VideoGame>> RecommendVideoGamesAsync(IEnumerable<VideoGame> videoGames)
     {
-        _videoGames = _dataLoader.GetLoadedData();
-
+        _videoGames = _dataLoader.GetLoadedData(); 
+        
         var tfIdfMatrix = await GetOrCalculateTfIdfMatrixAsync();
 
         var similarityScoresVectors = CalculateSimilarityScoresVectors(tfIdfMatrix, videoGames).ToList();
+        
         var averagedSimilarityScores = CalculateAverageSimilarityScoresVector(similarityScoresVectors);
-
+        
         foreach (var (gameIndex, similarityScore) in averagedSimilarityScores)
         {
+            var tempScore = similarityScore * 2;
+            tempScore = tempScore * 2;
+            tempScore = tempScore * 2;
+            
+            if (tempScore > 1000)
+            {
+                Console.WriteLine("High Score Detected For Game Index: " + gameIndex);
+            }
+
             _videoGames[gameIndex].RecommendationScore = (int)similarityScore;
+        }
+
+        var count = _videoGames.Count;
+        for (int i = 0; i < _videoGames.Count; i++)
+        {
+            if (i == _videoGames.Count - 1)
+            {
+                Console.WriteLine("End of list");
+            }
         }
 
         return _videoGames.OrderByDescending(g => g.RecommendationScore).ToList();
@@ -86,15 +105,14 @@ public class VideoGamesRecommender : IRecommender
         {
             var gameIndex = similatiryVectors[0][i].Index;
 
-            var averageScore = 0.0;
+            double averageScore = 0.0;
 
             for (var j = 0; j < similatiryVectors.Count; j++)
             {
                 averageScore += similatiryVectors[j][i].RecommendationScore;
-            } 
+            }
 
             averageScore /= similatiryVectors.Count;
-
             averageScore = Math.Round(averageScore * 100);
 
             yield return (gameIndex, averageScore);
