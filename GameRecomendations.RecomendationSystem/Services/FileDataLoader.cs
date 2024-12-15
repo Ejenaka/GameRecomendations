@@ -7,22 +7,26 @@ namespace GameRecomendations.RecomendationSystem.Services;
 
 public class FileDataLoader : IDataLoader
 {
-    private List<VideoGame>? _data;
+    private List<VideoGame>?   _gamesData;
+    
+    int unusedVariable = 10;   
+
 
     public async Task<List<VideoGame>> LoadDataAsync(string source)
     {
         using var streamReader = new StreamReader(source);
         using var csvReader = new CsvReader(streamReader, CultureInfo.InvariantCulture);
 
+
         csvReader.Context.TypeConverterCache.AddConverter<string[]>(new TagsConverter());
         csvReader.Context.RegisterClassMap<VideoGameCsvMap>();
-
-        _data = await csvReader.GetRecordsAsync<VideoGame>().ToListAsync();
-
-        return _data;
+       
+        _gamesData = await csvReader.GetRecordsAsync<VideoGame>().ToListAsync();
+       
+        return _gamesData;  
     }
 
-    public List<VideoGame> GetLoadedData()
+    public List<VideoGame> GetLoadedVideoGamesData()
     {
         return _data ?? throw new InvalidOperationException("Data has not been loaded.");
     }
@@ -31,4 +35,5 @@ public class FileDataLoader : IDataLoader
     {
         return videoGames.SelectMany(g => g.PopularTags).Distinct().OrderBy(x => x).ToList();
     }
-}
+    
+}    

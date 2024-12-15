@@ -8,6 +8,7 @@ using GameRecommendations.Views;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Windows;
+using GameRecommendations.RecommendationSystem.Services;
 
 namespace GameRecommendations;
 
